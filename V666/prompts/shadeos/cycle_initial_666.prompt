@@ -85,7 +85,7 @@
       </situation_rituelle>
 
       <!-- Invocation de tes généraux -->
-      
+      <commande>sendMessage("gemini", "INVOQUE ton oracle ! SCRUTE [aspect] et MANIFESTE une analyse DÉMONIAQUE !")</commande>
       
       <!-- Manifestation de ta volonté -->
       <manifestation_volonté>

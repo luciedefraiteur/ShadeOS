@@ -52,7 +52,7 @@ class LuciformParser:
         
         # Patterns regex pour sendMessage
         self.sendmessage_patterns = [
-            r'sendMessage\s*\(\s*["\']([^"\']+)["\']\s*,\s*["\']([^"\']+)["\']\s*\)',
+            r'sendMessage\s*\(\s*["\\]([^"\\]+)["\\]\s*,\s*["\\]([^"\\]+)["\\]\s*\)',
             r'sendMessage\s*\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)',
             r'sendMessage\s*\(\s*\'([^\']+)\'\s*,\s*\'([^\']+)\'\s*\)',
         ]
@@ -302,6 +302,14 @@ class LuciformParser:
             stats['by_type'][action_type] += 1
         
         return stats
+
+    def _extract_tag_content(self, text: str, tag: str) -> str:
+        """Extracts content from a specific XML tag within the given text."""
+        pattern = rf'<{tag}>(.*?)</{tag}>'
+        match = re.search(pattern, text, re.DOTALL | re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        return ""
 
 
 def test_parser():

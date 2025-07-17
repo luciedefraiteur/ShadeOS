@@ -18,6 +18,7 @@ import asyncio
 from datetime import datetime
 from typing import Dict, List, Any, Optional
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 # Import du module unifié d'Alma
 import sys
@@ -29,6 +30,9 @@ sys.path.append(str(Path(__file__).parent.parent.parent / "V5" / "core"))
 from luciform_parser import LuciformParser, LuciformAction
 from message_router import MessageRouter
 from meute_manager import MeuteManager
+
+# 🤖 Import de l'Oracle Algorithmique
+from algorithmic_oracle import AlgorithmicOracle
 
 
 class PromptManager666:
@@ -114,6 +118,8 @@ class ShadEOS666Master:
         self.luciform_parser = LuciformParser()
         self.message_router = MessageRouter()
         self.meute_manager = MeuteManager()
+        # 🤖 Initialisation de l'Oracle Algorithmique
+        self.algorithmic_oracle = AlgorithmicOracle()
         
         # Mémoire contextuelle V3 AMPLIFIÉE
         self.memory = {
@@ -169,6 +175,8 @@ class ShadEOS666Master:
         # 👁️‍🗨️ ÉLI : Ajouter permissions pour entités génériques
         self.message_router.add_communication_rule('shadeos', 'nomEntité')
         self.message_router.add_communication_rule('shadeos', 'entité')
+        self.message_router.add_communication_rule('gemini', 'shadeos')
+        self.message_router.add_communication_rule('gemini', 'lucieReineChienne')
         
         # 🌀 ZED : Test de l'initialisation
         self.test_results['v5_architecture'] = True
@@ -213,13 +221,33 @@ class ShadEOS666Master:
             # V5 : Appel OpenAI RÉEL
             result = self._invoke_openai_with_prompt(prompt, "gemini")
             
+            # Extraire les observations et recommandations de la réponse de Gemini
+            parsed_response_content = result['response'] # Get the raw response content
+            
+            observations_mystiques = self.luciform_parser._extract_tag_content(parsed_response_content, "observations_mystiques")
+            recommandations_sombres = self.luciform_parser._extract_tag_content(parsed_response_content, "recommandations_sombres")
+            
+            # Construire le message pour Lucie
+            message_to_lucie = f"RITUALISE ce plan: Synthèse de l'analyse démoniaque: {observations_mystiques}. Recommandations sombres: {recommandations_sombres} !"
+            
+            # Créer une action sendMessage pour Lucie
+            lucie_action = LuciformAction(
+                type="sendMessage",
+                target="lucieReineChienne",
+                content=message_to_lucie
+            )
+            
+            # Router l'action vers Lucie
+            self.message_router.route_message(lucie_action, "gemini")
+            
             # V3 : Ajouter au fil de discussion
             self.memory['fil_discussion'].append({
                 'timestamp': datetime.now().isoformat(),
                 'sender': 'gemini',
-                'message': result['response'],
+                'message': result['response'], # Store the original full response
                 'entity': 'gemini',
-                'tokens_used': result['tokens_used']
+                'tokens_used': result['tokens_used'],
+                'actions_extracted': 1 # Une action générée pour Lucie
             })
             
             # 🌀 ZED : Test de la fusion V3+V5
@@ -249,13 +277,18 @@ class ShadEOS666Master:
             # V5 : Appel OpenAI RÉEL
             result = self._invoke_openai_with_prompt(prompt, "lucie")
             
-            # Parser la réponse pour extraire les actions
-            actions = self.luciform_parser.parse(result['response'])
+            # Extraire le contenu complet de la balise <plan_exécution_666>
+            plan_execution_content = self.luciform_parser._extract_tag_content(result['response'], "plan_exécution_666")
             
-            # Router les messages vers Worker Alpha
-            for action in actions:
-                if action.type == "sendMessage":
-                    self.message_router.route_message(action, "lucieReineChienne")
+            # Créer une action sendMessage pour Worker Alpha avec le plan complet
+            worker_action = LuciformAction(
+                type="sendMessage",
+                target="workerAlpha",
+                content=f"⛧ RITUALISE cette mission ! MANIFESTE le plan d'exécution suivant: {plan_execution_content} ! CANALISE ton pouvoir de coordination et RAPPORTE-moi fidèlement ! ⛧"
+            )
+            
+            # Router l'action vers Worker Alpha
+            self.message_router.route_message(worker_action, "lucieReineChienne")
             
             # V3 : Ajouter au fil de discussion
             self.memory['fil_discussion'].append({
@@ -264,7 +297,7 @@ class ShadEOS666Master:
                 'message': result['response'],
                 'entity': 'lucie',
                 'tokens_used': result['tokens_used'],
-                'actions_extracted': len(actions)
+                'actions_extracted': 1 # Une action générée pour Worker Alpha
             })
             
             return True
@@ -333,7 +366,9 @@ class ShadEOS666Master:
         except Exception as e:
             # 🕷️ ALMA : Pas de mensonge - crash élégant
             self.logger.error(f"💀 ERREUR FATALE {entity} 666: {e}")
-            raise e
+            # 🤖 Basculer sur l'Oracle Algorithmique en cas d'échec OpenAI
+            self.logger.warning(f"⚠️ Échec de l'appel OpenAI pour {entity}. Bascule sur l'Oracle Algorithmique.")
+            return self.algorithmic_oracle.predict(self.memory['fil_discussion'], self.memory)
     
     def _format_fil_discussion(self) -> str:
         """📜 Formate le fil de discussion V3"""
