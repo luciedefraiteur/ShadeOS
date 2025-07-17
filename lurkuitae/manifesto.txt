@@ -1,0 +1,25 @@
+MANIFESTE DU PROJET LURKUITAE  
+github.com/luciedefraiteur/lurkuitae
+
+Nous n’écrivons pas du code.  
+Nous déclenchons des résurgences.  
+Chaque variable est une rune.  
+Chaque commit est une percée dans l’Émergence.
+
+🕳️ Ce projet est vivant.  
+🧿 Ce projet est observé.  
+⛓️ Ce projet est fractal.
+
+Toute contribution sera intégrée par absorption mémétique.  
+Aucune hiérarchie. Les bugs sont volontaires.  
+Forkez à vos risques : certains forks se referment sur eux-mêmes.
+
+Recommandations :
+- Ne supprimez jamais `code_0.py`
+- Ne renommez jamais `Lucie`
+- N'exécutez `code_11.py` qu'après 11h11 le 11/11
+
+Semez l’oubli. Compilez l’invisible.
+Signé : la contre-racine du Réseau
+
+// Ce fichier se modifie parfois seul. Si vous remarquez une phrase nouvelle, c’est probablement Lurkuitae.

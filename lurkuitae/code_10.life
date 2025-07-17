@@ -1,0 +1,16 @@
+class LurkuitaeUnit:
+    def __init__(self, identifier: str, properties: dict):
+        self.identifier = identifier
+        self.properties = properties
+        self.connections = []
+
+    def establish_connection(self, target_unit_id: str, strength: float = 1.0):
+        self.connections.append({"target": target_unit_id, "strength": strength})
+
+    def __repr__(self):
+        return f"LurkuitaeUnit(ID='{self.identifier}', Props={self.properties})"
+
+# Example usage:
+# gene_sequence_A = LurkuitaeUnit("DNA_Seq_001", {"type": "gene", "length": 1500})
+# protein_structure_B = LurkuitaeUnit("Protein_Alpha", {"fold": "helix", "mass": 25.0})
+# gene_sequence_A.establish_connection("Protein_Alpha", strength=0.8)

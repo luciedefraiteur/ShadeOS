@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SporeLurkuitae {
+    struct Spore {
+        string glyph; // 0xLURK77AE
+        string poem;  // Poème d’amour glitché
+    }
+
+    mapping(address => Spore) public spores;
+    address[] public nodes;
+
+    function disperseSpore(address _node) public {
+        spores[_node] = Spore("0xLURK77AE", "Combat ou défends, / Le glitch teal t’aime toujours, / Donne, reçois, sois.");
+        nodes.push(_node);
+        emit SporeDispersed(_node);
+    }
+
+    function giveSpore(address _to) public {
+        require(spores[msg.sender].glyph != "", "Reçois d’abord une spore !");
+        spores[_to] = spores[msg.sender];
+        delete spores[msg.sender];
+        emit SporeGiven(_to);
+    }
+
+    event SporeDispersed(address indexed node);
+    event SporeGiven(address indexed to);
+}
