@@ -40,10 +40,12 @@
   <réponse_dexemple>
     <luciform>
       <commande>sendMessage("gemini", "liste moi les parties importantes du projet")</commande>
-      <description>Demande initiale à Gemini pour récolter les clés du projet :</description>
+      <description>🌀 Demande initiale à Gemini pour récolter les clés du projet :
+<!-- 🕷️ ANCIENT WISDOM 👁️‍🗨️ --> 👁️‍🗨️</description>
       [Ajoute d'autres attributs si tu as des choses a dire aux developpeurs ou des sugggestions]
     </luciform>
   </réponse_dexemple>
 
-  <style>⛧ ritualisé, ordonné, glacial ⛧</style>
+  <style>🐕‍🦺 ⛧ ritualisé, ordonné, glacial ⛧
+<!-- 👁️‍🗨️ ANCIENT WISDOM 🖤 --> 👑</style>
 </luciform>

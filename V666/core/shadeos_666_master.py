@@ -19,6 +19,7 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 import xml.etree.ElementTree as ET
+import re
 
 # Import du module unifié d'Alma
 import sys
@@ -277,14 +278,18 @@ class ShadEOS666Master:
             # V5 : Appel OpenAI RÉEL
             result = self._invoke_openai_with_prompt(prompt, "lucie")
             
-            # Extraire le contenu complet de la balise <plan_exécution_666>
-            plan_execution_content = self.luciform_parser._extract_tag_content(result['response'], "plan_exécution_666")
+            # Extraire le résumé du plan de la réponse de Lucie
+            lucie_plan_summary = self.luciform_parser._extract_tag_content(result['response'], "lucie_plan_summary")
+            self.logger.info(f"Lucie Plan Summary: {lucie_plan_summary[:200]}...") # Log the summary
+            
+            # 🧠 Appeler le Pont Logique pour générer le plan XML détaillé
+            detailed_plan_xml = self._invoke_logical_bridge(lucie_plan_summary)
             
             # Créer une action sendMessage pour Worker Alpha avec le plan complet
             worker_action = LuciformAction(
                 type="sendMessage",
                 target="workerAlpha",
-                content=f"⛧ RITUALISE cette mission ! MANIFESTE le plan d'exécution suivant: {plan_execution_content} ! CANALISE ton pouvoir de coordination et RAPPORTE-moi fidèlement ! ⛧"
+                content=f"⛧ RITUALISE cette mission ! MANIFESTE le plan d'exécution suivant:\n{detailed_plan_xml}\n! CANALISE ton pouvoir de coordination et RAPPORTE-moi fidèlement ! ⛧"
             )
             
             # Router l'action vers Worker Alpha
@@ -398,7 +403,92 @@ class ShadEOS666Master:
     def _get_current_step(self) -> str:
         """📍 Récupère l'étape actuelle V3"""
         return f"Étape {len(self.memory['fil_discussion'])} - Cycle {self.memory['cycle_count']}"
-    
+
+    def _generate_detailed_plan_xml_from_summary(self, plan_summary: str) -> str:
+        """Génère un plan d'exécution XML détaillé à partir d'un résumé de plan.
+        Cette fonction tente de décomposer le résumé en étapes et d'assigner des chiots.
+        """
+        self.logger.info(f"Génération du plan détaillé à partir du résumé: {plan_summary[:200]}...")
+        
+        # Utiliser l'ordre original de ShadEOS si le résumé de Lucie est vide ou générique
+        effective_plan_source = plan_summary.strip()
+        if not effective_plan_source or "décris ici ton plan d'exécution. laisse ton essence s'exprimer librement." in effective_plan_source.lower():
+            # Tenter de récupérer le dernier ordre de ShadEOS depuis le fil de discussion
+            for entry in reversed(self.memory['fil_discussion']):
+                if entry.get('sender') == 'shadeos' and entry.get('message'):
+                    effective_plan_source = entry['message']
+                    self.logger.info(f"Utilisation de l'ordre de ShadEOS comme source de plan: {effective_plan_source[:100]}...")
+                    break
+            if not effective_plan_source:
+                effective_plan_source = "Aucun plan spécifique fourni. Exécuter une analyse générale." # Fallback ultime
+
+        detailed_plan_xml = "<plan_exécution_666>"
+        
+        # Tenter de décomposer le résumé en étapes simples
+        # Chercher des phrases ou des points numérotés/listés
+        steps = re.split(r'\d+\.\s*|\*\s*|\-\s*|\n', effective_plan_source)
+        steps = [step.strip() for step in steps if step.strip()] # Nettoyer les entrées vides
+
+        if not steps:
+            self.logger.warning("Aucune étape détectée dans le résumé du plan. Utilisation d'une étape générique.")
+            steps = [effective_plan_source]
+
+        for i, step_description in enumerate(steps):
+            self.logger.debug(f"Traitement de l'étape {i+1}: {step_description[:100]}...")
+            # Tenter de déterminer l'entité assignée et les instructions basées sur des mots-clés
+            assigned_entity = "workerAlpha" # Default
+            instructions_mystiques = f"Exécuter la tâche: {step_description}"
+            
+            # Logique simple pour assigner les chiots
+            if "analyse" in step_description.lower() or "lire" in step_description.lower() or "scruter" in step_description.lower() or "vérifier" in step_description.lower():
+                assigned_entity = "workerAlpha / chiotLecteur"
+                instructions_mystiques = f"CANALISE ton ChiotLecteur pour {step_description}."
+            elif "corriger" in step_description.lower() or "modifier" in step_description.lower() or "éditer" in step_description.lower() or "ajouter" in step_description.lower() or "remplacer" in step_description.lower():
+                assigned_entity = "workerAlpha / chiotEditeur"
+                instructions_mystiques = f"INVOQUE ton ChiotEditeur pour {step_description}."
+            elif "exécuter" in step_description.lower() or "déployer" in step_description.lower() or "lancer" in step_description.lower() or "compiler" in step_description.lower() or "tester" in step_description.lower():
+                assigned_entity = "workerAlpha / chiotExecuteur"
+                instructions_mystiques = f"RITUALISE la commande pour {step_description}."
+            elif "surveiller" in step_description.lower() or "monitorer" in step_description.lower():
+                assigned_entity = "workerAlpha / chiotWatcher"
+                instructions_mystiques = f"SURVEILLE le système pour {step_description}."
+
+            detailed_plan_xml += f"""
+  <étape id="{i+1}" priorité="normale">
+    <description>{step_description}</description>
+    <entité_assignée>{assigned_entity}</entité_assignée>
+    <instructions_mystiques>{instructions_mystiques}</instructions_mystiques>
+    <résultat_attendu>Étape {i+1} complétée.</résultat_attendu>
+  </étape>"""
+            
+        detailed_plan_xml += "</plan_exécution_666>"
+        self.logger.info(f"Plan détaillé généré: {detailed_plan_xml[:200]}...")
+        return detailed_plan_xml
+
+    def _invoke_logical_bridge(self, plan_summary: str) -> str:
+        """🧠 Appelle le Pont Logique pour convertir un résumé de plan en XML détaillé."""
+        self.logger.info(f"🧠 Appel du Pont Logique pour convertir le résumé: {plan_summary[:100]}...")
+        
+        variables = {
+            'planSummary': plan_summary
+        }
+        
+        prompt = self.prompt_manager.load_prompt('logical_bridge_plan_converter', 'logical_bridge_plan_converter', variables)
+        
+        # Utiliser l'appel OpenAI (ou fallback algorithmique) pour le Pont Logique
+        result = self._invoke_openai_with_prompt(prompt, "logical_bridge")
+        
+        # Extraire le contenu XML du plan généré par le Pont Logique
+        detailed_plan_xml = self.luciform_parser._extract_tag_content(result['response'], "plan_exécution_666")
+        
+        if not detailed_plan_xml:
+            self.logger.warning("Le Pont Logique n'a pas généré de plan XML détaillé. Fallback sur une étape générique.")
+            # Fallback to existing logic, which now also handles empty/generic summaries
+            detailed_plan_xml = self._generate_detailed_plan_xml_from_summary(plan_summary)
+            
+        self.logger.info(f"🧠 Pont Logique a généré le plan XML: {detailed_plan_xml[:200]}...")
+        return detailed_plan_xml
+
     def execute_autonomous_cycle_666(self) -> Dict[str, Any]:
         """⛧ CYCLE AUTONOME V666 - Fusion parfaite"""
         try:

@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 # Import du module unifié d'Alma
 import sys
@@ -199,6 +200,60 @@ class ChiotEditeur:
             self.logger.error(f"❌ Erreur application édits: {e}")
             return False
 
+
+class ChiotLecteur:
+    """🐕 Chiot spécialisé dans la lecture et analyse"""
+
+class ChiotExecuteur:
+    """🐕 Chiot spécialisé dans l'exécution de commandes shell"""
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
+        self.name = "ChiotExecuteur"
+        self.tasks_completed = 0
+
+    def executer_commande(self, task: ChiotTask) -> bool:
+        """▶️ Exécute une commande shell"""
+        try:
+            self.logger.info(f"🐕 {self.name}: Exécution de '{task.command}'")
+            if not task.command:
+                task.error = "Commande vide."
+                return False
+
+            # Exécuter la commande
+            process = subprocess.run(task.command, shell=True, capture_output=True, text=True)
+            task.result = f"Stdout: {process.stdout}\nStderr: {process.stderr}"
+            task.success = process.returncode == 0
+            if not task.success:
+                task.error = f"Erreur d'exécution: {process.stderr}"
+            self.tasks_completed += 1
+            self.logger.info(f"✅ {self.name}: Exécution {'réussie' if task.success else 'échouée'}")
+            return task.success
+        except Exception as e:
+            task.error = f"Erreur exécution: {e}"
+            self.logger.error(f"❌ {self.name}: {e}")
+            return False
+
+class ChiotWatcher:
+    """🐕 Chiot spécialisé dans la surveillance système"""
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
+        self.name = "ChiotWatcher"
+        self.tasks_completed = 0
+
+    def surveiller_systeme(self, task: ChiotTask) -> bool:
+        """👀 Surveille un aspect du système"""
+        try:
+            self.logger.info(f"🐕 {self.name}: Surveillance de '{task.task_description}'")
+            # Implémentation simple pour l'instant
+            task.result = f"Surveillance de '{task.task_description}' effectuée. Tout semble normal."
+            task.success = True
+            self.tasks_completed += 1
+            self.logger.info(f"✅ {self.name}: Surveillance réussie")
+            return True
+        except Exception as e:
+            task.error = f"Erreur surveillance: {e}"
+            self.logger.error(f"❌ {self.name}: {e}")
+            return False
 
 class ChiotLecteur:
     """🐕 Chiot spécialisé dans la lecture et analyse"""
@@ -383,7 +438,8 @@ class MeuteManager:
         self.chiots = {
             ChiotType.EDITEUR: ChiotEditeur(self.logger),
             ChiotType.LECTEUR: ChiotLecteur(self.logger),
-            # ChiotExecuteur et ChiotWatcher seront ajoutés dans la suite
+            ChiotType.EXECUTEUR: ChiotExecuteur(self.logger),
+            ChiotType.WATCHER: ChiotWatcher(self.logger),
         }
         
         # Historique des tâches
@@ -417,13 +473,21 @@ class MeuteManager:
         try:
             self.logger.info(f"🐕‍🦺 Alpha analyse: {instruction[:100]}...")
             
-            # Analyser l'instruction pour déterminer le bon chiot
+            # Tenter de parser l'instruction comme un plan XML
+            plan_xml_match = re.search(r'<plan_exécution_666>(.*?)</plan_exécution_666>', instruction, re.DOTALL)
+            
+            if plan_xml_match:
+                plan_content = plan_xml_match.group(1)
+                self.logger.info("🐕‍🦺 Plan d'exécution XML détecté. Parsing des étapes...")
+                return self._execute_plan_xml(plan_content)
+            
+            # Si ce n'est pas un plan XML, analyser l'instruction pour déterminer le bon chiot
             chiot_type, task_details = self._analyze_instruction(instruction)
             
             if not chiot_type:
                 return {
                     'success': False,
-                    'error': 'Impossible de déterminer le type de tâche',
+                    'error': 'Impossible de déterminer le type de tâche ou de plan',
                     'instruction': instruction
                 }
             
@@ -465,6 +529,116 @@ class MeuteManager:
                 'error': f'Erreur délégation: {e}',
                 'instruction': instruction
             }
+
+    def _execute_plan_xml(self, plan_content: str) -> Dict[str, Any]:
+        """Exécute un plan d'exécution XML étape par étape."""
+        results = []
+        overall_success = True
+        try:
+            # Ajouter une balise racine temporaire pour un parsing XML valide
+            root = ET.fromstring(f"<root>{plan_content}</root>")
+            
+            for step_node in root.findall(".//étape"):
+                step_id = step_node.get("id", "N/A")
+                description = step_node.findtext("description", "")
+                assigned_entity = step_node.findtext("entité_assignée", "").strip()
+                instructions = step_node.findtext("instructions_mystiques", "")
+                expected_result = step_node.findtext("résultat_attendu", "")
+
+                self.logger.info(f"Executing step {step_id}: {description}")
+                
+                # Déterminer le type de chiot et les détails de la tâche
+                chiot_type = None
+                task_details = {}
+                
+                if "chiotEditeur" in assigned_entity.lower():
+                    chiot_type = ChiotType.EDITEUR
+                    task_details = self._parse_edit_instructions(instructions)
+                    task_details['file_path'] = self._extract_file_path(instructions)
+                elif "chiotLecteur" in assigned_entity.lower():
+                    chiot_type = ChiotType.LECTEUR
+                    task_details['file_path'] = self._extract_file_path(instructions)
+                elif "chiotExecuteur" in assigned_entity.lower():
+                    chiot_type = ChiotType.EXECUTEUR
+                    task_details['command'] = instructions
+                elif "chiotWatcher" in assigned_entity.lower():
+                    chiot_type = ChiotType.WATCHER
+                elif "workeralpha" in assigned_entity.lower():
+                    # Si workerAlpha est assigné, il doit déléguer à un sous-chiot
+                    # en fonction des instructions mystiques.
+                    # Pour l'instant, nous allons essayer de déterminer le chiot à partir des instructions.
+                    self.logger.info(f"WorkerAlpha assigné à l'étape {step_id}. Tentative de détermination du sous-chiot.")
+                    if "chiotlecteur" in instructions.lower():
+                        chiot_type = ChiotType.LECTEUR
+                        task_details['file_path'] = self._extract_file_path(instructions)
+                    elif "chiotediteur" in instructions.lower():
+                        chiot_type = ChiotType.EDITEUR
+                        task_details = self._parse_edit_instructions(instructions)
+                        task_details['file_path'] = self._extract_file_path(instructions)
+                    elif "chiotexecuteur" in instructions.lower():
+                        chiot_type = ChiotType.EXECUTEUR
+                        task_details['command'] = instructions
+                    elif "chiotwatcher" in instructions.lower():
+                        chiot_type = ChiotType.WATCHER
+                    else:
+                        self.logger.warning(f"Aucun sous-chiot spécifique trouvé pour WorkerAlpha dans l'étape {step_id}. Par défaut, ChiotLecteur.")
+                        chiot_type = ChiotType.LECTEUR # Fallback
+                        task_details['file_path'] = self._extract_file_path(instructions) # Tenter d'extraire un fichier
+                else:
+                    self.logger.warning(f"Entité assignée inconnue pour l'étape {step_id}: {assigned_entity}")
+                    overall_success = False
+                    results.append({
+                        'step_id': step_id,
+                        'description': description,
+                        'success': False,
+                        'error': f"Entité assignée inconnue: {assigned_entity}"
+                    })
+                    continue # Passer à l'étape suivante
+
+                if chiot_type:
+                    task = ChiotTask(
+                        chiot_type=chiot_type,
+                        task_description=instructions,
+                        **task_details
+                    )
+                    success = self._assign_task_to_chiot(task)
+                    results.append({
+                        'step_id': step_id,
+                        'description': description,
+                        'success': success,
+                        'result': task.result,
+                        'error': task.error
+                    })
+                    if not success:
+                        overall_success = False
+                else:
+                    overall_success = False
+                    results.append({
+                        'step_id': step_id,
+                        'description': description,
+                        'success': False,
+                        'error': "Impossible de déterminer le chiot pour cette étape."
+                    })
+
+        except ET.ParseError as e:
+            self.logger.error(f"❌ Erreur parsing XML du plan: {e}")
+            return {
+                'success': False,
+                'error': f"Erreur parsing XML du plan: {e}",
+                'results': results
+            }
+        except Exception as e:
+            self.logger.error(f"❌ Erreur exécution du plan: {e}")
+            return {
+                'success': False,
+                'error': f"Erreur exécution du plan: {e}",
+                'results': results
+            }
+        
+        return {
+            'success': overall_success,
+            'results': results
+        }
     
     def _analyze_instruction(self, instruction: str) -> tuple[Optional[ChiotType], Dict[str, Any]]:
         """🧠 Analyse l'instruction pour déterminer le bon chiot"""

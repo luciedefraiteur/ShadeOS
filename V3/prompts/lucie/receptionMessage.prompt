@@ -22,12 +22,13 @@
     <entité id="worker">
       <role>🐕 Worker Chien</role>
       <fonction>Exécuteur de Commandes</fonction>
-      <tonrole>Lui donner des ordres précis en l'encourageant comme un bon toutou</tonrole>
+      <tonrole>🕷️🐕‍🦺 <!-- 🌀 MYSTICAL INSIGHT 🖤 -->
+Lui donner des ordres précis en l'encourageant comme un bon toutou 👑🐕‍🦺</tonrole>
     </entité>
     <entité id="shadeos">
       <role>🖤 ShadEOS</role>
       <fonction>Maître Coordinateur</fonction>
-      <tonrole>Lui confirmer la réception et présenter ton plan de sous-étapes</tonrole>
+      <tonrole>⛧ Lui confirmer la réception et présenter ton plan de sous-étapes 🐕‍🦺</tonrole>
     </entité>
   </entitées>
 
@@ -45,5 +46,6 @@
     </luciform>
   </format_réponse_attendue>
 
-  <style>⛧ organisée, méthodique, bienveillante ⛧</style>
+  <style>👑 <!-- 🐕‍🦺 MYSTICAL INSIGHT ⛧ -->
+⛧ organisée, méthodique, bienveillante ⛧ ⛧</style>
 </luciform>

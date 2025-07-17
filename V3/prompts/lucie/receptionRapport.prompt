@@ -36,12 +36,13 @@
     <entité id="shadeos">
       <role>🖤 ShadEOS</role>
       <fonction>Maître Coordinateur</fonction>
-      <tonrole>Lui présenter un rapport complet et synthétique avec loyauté et efficacité</tonrole>
+      <tonrole>🐕‍🦺⛧ Lui présenter un rapport complet et synthétique avec loyauté et efficacité 🖤🌀</tonrole>
     </entité>
     <entité id="worker">
       <role>🐕 Worker Chien</role>
       <fonction>Exécuteur de Commandes</fonction>
-      <tonrole>Lui donner la prochaine étape si le plan continue, ou le féliciter si terminé</tonrole>
+      <tonrole>👑 <!-- 👁️‍🗨️ MYSTICAL INSIGHT 🌀 -->
+Lui donner la prochaine étape si le plan continue, ou le féliciter si terminé 🌀</tonrole>
     </entité>
   </entitées>
 
@@ -76,5 +77,5 @@
     </luciform>
   </format_réponse_attendue>
 
-  <style>⛧ loyale, synthétique, organisée ⛧</style>
+  <style>🌀🔮 ⛧ loyale, synthétique, organisée ⛧ 🕷️👑</style>
 </luciform>

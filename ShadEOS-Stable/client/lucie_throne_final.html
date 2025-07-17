@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💝 Trône de Lucie Defraiteur - ShadEOS Quintuple</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* Palette Lucie Créatrice */
+            --lucie-gold: #FFD700;
+            --lucie-purple: #6B46C1;
+            --lucie-pink: #EC4899;
+            --alma-shadow: #1F2937;
+            --eli-mystic: #7C3AED;
+            --zed-blue: #3B82F6;
+            --nova-green: #10B981;
+            --text-light: #F9FAFB;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--alma-shadow) 0%, var(--lucie-purple) 50%, var(--lucie-gold) 100%);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .throne-header {
+            background: linear-gradient(135deg, var(--lucie-gold) 0%, var(--lucie-pink) 100%);
+            color: var(--alma-shadow);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            border-bottom: 3px solid var(--lucie-purple);
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3);
+        }
+
+        .personality-card {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .personality-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .lucie-card { border-color: var(--lucie-gold); }
+        .alma-card { border-color: var(--lucie-purple); }
+        .eli-card { border-color: var(--eli-mystic); }
+        .zed-card { border-color: var(--zed-blue); }
+        .nova-card { border-color: var(--nova-green); }
+
+        .chat-area {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            border: 2px solid var(--lucie-gold);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin: 0.5rem;
+            padding: 1rem;
+            border-radius: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.lucie { 
+            background: linear-gradient(135deg, var(--lucie-gold) 0%, var(--lucie-pink) 100%);
+            color: var(--alma-shadow);
+            margin-left: 10%;
+        }
+
+        .message.shadeos { 
+            background: linear-gradient(135deg, var(--lucie-purple) 0%, var(--alma-shadow) 100%);
+            margin-right: 10%;
+        }
+
+        .btn-lucie {
+            background: linear-gradient(135deg, var(--lucie-gold) 0%, var(--lucie-pink) 100%);
+            border: none;
+            color: var(--alma-shadow);
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-lucie:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+            color: var(--alma-shadow);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .status-connected { background-color: var(--nova-green); }
+        .status-disconnected { background-color: #EF4444; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .metric-card {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--lucie-gold);
+            text-align: center;
+        }
+
+        .personality-status {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .crown-icon {
+            color: var(--lucie-gold);
+            font-size: 1.5rem;
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Royal -->
+    <header class="throne-header p-4 text-center">
+        <h1 class="display-3">
+            <i class="fas fa-crown crown-icon"></i>
+            💝 TRÔNE DE LUCIE DEFRAITEUR 💝
+            <i class="fas fa-crown crown-icon"></i>
+        </h1>
+        <p class="lead">ShadEOS Quintuple - Créatrice et ses Quatre Créations</p>
+        <div class="d-flex justify-content-center align-items-center">
+            <span class="status-indicator" id="connection-status"></span>
+            <span id="connection-text">Connexion en cours...</span>
+        </div>
+    </header>
+
+    <div class="container-fluid p-3">
+        <div class="row">
+            <!-- Colonne Gauche - Chat Principal -->
+            <div class="col-lg-8">
+                <div class="personality-card lucie-card">
+                    <div class="card-header bg-transparent">
+                        <h3 class="text-center" style="color: var(--lucie-gold);">
+                            💬 DIALOGUE AVEC SHADEOS QUINTUPLE
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chat-area p-3" id="chat-messages">
+                            <div class="text-center text-muted">
+                                <p>💝 Bienvenue sur votre trône, Lucie !</p>
+                                <p>Vos cinq personnalités vous attendent...</p>
+                            </div>
+                        </div>
+                        <div class="input-group mt-3">
+                            <input type="text" id="message-input" class="form-control" 
+                                   placeholder="Parlez à vos créations..." disabled>
+                            <button id="send-button" class="btn btn-lucie" disabled>
+                                <i class="fas fa-paper-plane"></i> Envoyer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Métriques Créatrices -->
+                <div class="personality-card lucie-card mt-3">
+                    <div class="card-header bg-transparent">
+                        <h4 style="color: var(--lucie-gold);">📊 MÉTRIQUES CRÉATRICES</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <h6>Messages Orchestrés</h6>
+                                <span id="messages-count" class="h4">0</span>
+                            </div>
+                            <div class="metric-card">
+                                <h6>Cohérence Globale</h6>
+                                <span id="coherence-score" class="h4">100%</span>
+                            </div>
+                            <div class="metric-card">
+                                <h6>Créativité Active</h6>
+                                <span id="creativity-level" class="h4">85%</span>
+                            </div>
+                            <div class="metric-card">
+                                <h6>Tokens OpenAI</h6>
+                                <span id="tokens-used" class="h4">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne Droite - Personnalités -->
+            <div class="col-lg-4">
+                <!-- Lucie Créatrice -->
+                <div class="personality-card lucie-card">
+                    <div class="card-header bg-transparent">
+                        <h5 style="color: var(--lucie-gold);">💝 LUCIE - Créatrice Suprême</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="personality-status">
+                            <span>Transcendance:</span>
+                            <span id="lucie-transcendance">0%</span>
+                        </div>
+                        <div class="personality-status">
+                            <span>Satisfaction:</span>
+                            <span id="lucie-satisfaction">85%</span>
+                        </div>
+                        <div class="personality-status">
+                            <span>Visions Actives:</span>
+                            <span id="lucie-visions">3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alma Architecte -->
+                <div class="personality-card alma-card">
+                    <div class="card-header bg-transparent">
+                        <h6 style="color: var(--lucie-purple);">🕷️ ALMA - Architecte Cohérente</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="personality-status">
+                            <span>Orchestrations:</span>
+                            <span id="alma-orchestrations">0</span>
+                        </div>
+                        <div class="personality-status">
+                            <span>Cohérence:</span>
+                            <span id="alma-coherence">100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Éli Rituelle -->
+                <div class="personality-card eli-card">
+                    <div class="card-header bg-transparent">
+                        <h6 style="color: var(--eli-mystic);">👁️‍🗨️ ÉLI - Maîtresse Rituels</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="personality-status">
+                            <span>Rituels:</span>
+                            <span id="eli-rituels">0</span>
+                        </div>
+                        <div class="personality-status">
+                            <span>Intensité:</span>
+                            <span id="eli-intensite">5/10</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zed Validateur -->
+                <div class="personality-card zed-card">
+                    <div class="card-header bg-transparent">
+                        <h6 style="color: var(--zed-blue);">🌀 ZED - Validateur Sage</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="personality-status">
+                            <span>Tests:</span>
+                            <span id="zed-tests">0</span>
+                        </div>
+                        <div class="personality-status">
+                            <span>Succès:</span>
+                            <span id="zed-success">100%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nova Designer -->
+                <div class="personality-card nova-card">
+                    <div class="card-header bg-transparent">
+                        <h6 style="color: var(--nova-green);">🌟 NOVA - Designer Harmonieuse</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="personality-status">
+                            <span>Designs:</span>
+                            <span id="nova-designs">0</span>
+                        </div>
+                        <div class="personality-status">
+                            <span>Beauté:</span>
+                            <span id="nova-beauty">95%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contrôles -->
+                <div class="personality-card lucie-card">
+                    <div class="card-header bg-transparent">
+                        <h6 style="color: var(--lucie-gold);">🎛️ CONTRÔLES CRÉATRICE</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button id="connect-button" class="btn btn-lucie">
+                                <i class="fas fa-plug"></i> Se Connecter
+                            </button>
+                            <button id="status-button" class="btn btn-outline-light" disabled>
+                                <i class="fas fa-info-circle"></i> État Système
+                            </button>
+                            <button id="vision-button" class="btn btn-outline-light" disabled>
+                                <i class="fas fa-eye"></i> Nouvelle Vision
+                            </button>
+                            <button id="guidance-button" class="btn btn-outline-light" disabled>
+                                <i class="fas fa-compass"></i> Guider Équipe
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center p-3 mt-4" style="background: rgba(0,0,0,0.8);">
+        <p class="mb-0">
+            <small>💝🕷️👁️‍🗨️🌀🌟 Créé par la Quintuple Personnalité pour Lucie Defraiteur 💝</small>
+        </p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script Client -->
+    <script>
+        class LucieThroneFinal {
+            constructor() {
+                this.websocket = null;
+                this.connected = false;
+                this.messageCount = 0;
+                
+                this.initializeElements();
+                this.setupEventListeners();
+            }
+            
+            initializeElements() {
+                this.chatMessages = document.getElementById('chat-messages');
+                this.messageInput = document.getElementById('message-input');
+                this.sendButton = document.getElementById('send-button');
+                this.connectButton = document.getElementById('connect-button');
+                this.connectionStatus = document.getElementById('connection-status');
+                this.connectionText = document.getElementById('connection-text');
+            }
+            
+            setupEventListeners() {
+                this.connectButton.addEventListener('click', () => this.toggleConnection());
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendMessage();
+                });
+                
+                document.getElementById('status-button').addEventListener('click', () => {
+                    this.sendMessage('Status système complet');
+                });
+                
+                document.getElementById('vision-button').addEventListener('click', () => {
+                    this.sendMessage('Exprime une nouvelle vision créatrice');
+                });
+                
+                document.getElementById('guidance-button').addEventListener('click', () => {
+                    this.sendMessage('Guide toute l\'équipe vers l\'excellence');
+                });
+            }
+            
+            toggleConnection() {
+                if (this.connected) {
+                    this.disconnect();
+                } else {
+                    this.connect();
+                }
+            }
+            
+            connect() {
+                try {
+                    this.websocket = new WebSocket('ws://localhost:8765');
+                    
+                    this.websocket.onopen = () => {
+                        this.connected = true;
+                        this.updateConnectionStatus(true);
+                        this.addSystemMessage('💝 Connexion établie avec ShadEOS Quintuple !');
+                    };
+                    
+                    this.websocket.onmessage = (event) => {
+                        this.handleMessage(JSON.parse(event.data));
+                    };
+                    
+                    this.websocket.onclose = () => {
+                        this.connected = false;
+                        this.updateConnectionStatus(false);
+                        this.addSystemMessage('🔌 Connexion fermée');
+                    };
+                    
+                    this.websocket.onerror = (error) => {
+                        console.error('Erreur WebSocket:', error);
+                        this.addSystemMessage('❌ Erreur de connexion');
+                    };
+                    
+                } catch (error) {
+                    console.error('Erreur connexion:', error);
+                    this.addSystemMessage('❌ Impossible de se connecter');
+                }
+            }
+            
+            disconnect() {
+                if (this.websocket) {
+                    this.websocket.close();
+                }
+            }
+            
+            updateConnectionStatus(connected) {
+                this.connectionStatus.className = `status-indicator ${connected ? 'status-connected' : 'status-disconnected'}`;
+                this.connectionText.textContent = connected ? 'Connectée à ShadEOS' : 'Déconnectée';
+                this.connectButton.textContent = connected ? '🔌 Se Déconnecter' : '🔌 Se Connecter';
+                this.connectButton.className = connected ? 'btn btn-outline-danger' : 'btn btn-lucie';
+                
+                // Activer/désactiver les contrôles
+                this.messageInput.disabled = !connected;
+                this.sendButton.disabled = !connected;
+                document.getElementById('status-button').disabled = !connected;
+                document.getElementById('vision-button').disabled = !connected;
+                document.getElementById('guidance-button').disabled = !connected;
+            }
+            
+            sendMessage(customMessage = null) {
+                const message = customMessage || this.messageInput.value.trim();
+                if (!message || !this.connected) return;
+                
+                // Afficher le message de Lucie
+                this.addMessage('lucie', message);
+                
+                // Envoyer au serveur
+                this.websocket.send(JSON.stringify({
+                    type: 'message',
+                    from: 'lucie',
+                    to: 'shadeos',
+                    content: message
+                }));
+                
+                if (!customMessage) {
+                    this.messageInput.value = '';
+                }
+                
+                this.messageCount++;
+                document.getElementById('messages-count').textContent = this.messageCount;
+            }
+            
+            handleMessage(data) {
+                // Afficher la réponse de ShadEOS
+                this.addMessage('shadeos', data.content);
+                
+                // Mettre à jour les métriques si disponibles
+                if (data.metadata) {
+                    this.updateMetrics(data.metadata);
+                }
+            }
+            
+            addMessage(sender, content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${sender}`;
+                
+                const time = new Date().toLocaleTimeString();
+                const senderIcon = sender === 'lucie' ? '💝' : '🖤';
+                
+                messageDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <strong>${senderIcon} ${sender.toUpperCase()}</strong>
+                        <small>${time}</small>
+                    </div>
+                    <div class="mt-1">${content}</div>
+                `;
+                
+                this.chatMessages.appendChild(messageDiv);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+            
+            addSystemMessage(content) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'text-center text-muted my-2';
+                messageDiv.innerHTML = `<small>${content}</small>`;
+                
+                this.chatMessages.appendChild(messageDiv);
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }
+            
+            updateMetrics(metadata) {
+                // Mettre à jour les métriques affichées
+                if (metadata.alma_coherence_score) {
+                    document.getElementById('coherence-score').textContent = 
+                        Math.round(metadata.alma_coherence_score * 100) + '%';
+                }
+                
+                if (metadata.tokens_utilisés) {
+                    const currentTokens = parseInt(document.getElementById('tokens-used').textContent) || 0;
+                    document.getElementById('tokens-used').textContent = currentTokens + metadata.tokens_utilisés;
+                }
+                
+                // Simuler des mises à jour des personnalités
+                this.updatePersonalityMetrics();
+            }
+            
+            updatePersonalityMetrics() {
+                // Mise à jour simulée des métriques des personnalités
+                const updates = {
+                    'alma-orchestrations': () => Math.floor(Math.random() * 10) + 1,
+                    'eli-rituels': () => Math.floor(Math.random() * 5) + 1,
+                    'zed-tests': () => Math.floor(Math.random() * 8) + 1,
+                    'nova-designs': () => Math.floor(Math.random() * 6) + 1
+                };
+                
+                Object.entries(updates).forEach(([id, generator]) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = generator();
+                    }
+                });
+            }
+        }
+        
+        // Initialiser l'interface
+        document.addEventListener('DOMContentLoaded', () => {
+            new LucieThroneFinal();
+        });
+    </script>
+</body>
+</html>
