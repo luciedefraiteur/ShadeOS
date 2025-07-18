@@ -126,25 +126,32 @@ class LuciformParser:
         actions = []
         
         # Balises à rechercher
-        xml_tags = ['shell', 'edit', 'read', 'backup', 'validate', 'analyze', 'extract', 'summarize']
+        xml_tags = ['shell', 'edit', 'read', 'backup', 'validate', 'analyze', 'extract', 'summarize', 'plan_exécution_666']
         
         for tag in xml_tags:
             pattern = f'<{tag}>(.*?)</{tag}>'
             matches = re.finditer(pattern, text, re.DOTALL | re.IGNORECASE)
-            
+
             for match in matches:
                 content = match.group(1).strip()
-                
+
+                action_type = tag
+                metadata = {
+                    'xml_tag': tag,
+                    'match_start': match.start(),
+                    'match_end': match.end()
+                }
+
+                if tag == 'plan_exécution_666':
+                    action_type = 'plan'
+                    metadata['steps'] = self.parse_plan_xml(content)
+
                 action = LuciformAction(
-                    type=tag,
+                    type=action_type,
                     content=content,
-                    metadata={
-                        'xml_tag': tag,
-                        'match_start': match.start(),
-                        'match_end': match.end()
-                    }
+                    metadata=metadata
                 )
-                
+
                 actions.append(action)
                 self.logger.debug(f"🔧 {tag} trouvé: {content[:50]}...")
         
@@ -167,7 +174,7 @@ class LuciformParser:
         text = text.replace('<', '&lt;').replace('>', '&gt;')
         
         # Restaurer les balises légitimes
-        legitimate_tags = ['luciform', 'shell', 'edit', 'read', 'commande', 'backup', 'validate']
+        legitimate_tags = ['luciform', 'shell', 'edit', 'read', 'commande', 'backup', 'validate', 'plan_exécution_666']
         for tag in legitimate_tags:
             text = text.replace(f'&lt;{tag}&gt;', f'<{tag}>')
             text = text.replace(f'&lt;/{tag}&gt;', f'</{tag}>')
@@ -256,6 +263,24 @@ class LuciformParser:
                 'type': 'raw_read',
                 'content': read_content
             }
+
+    def parse_plan_xml(self, plan_content: str) -> List[Dict[str, Any]]:
+        """Parse un plan_exécution_666 en liste d'étapes structurées."""
+        steps = []
+        try:
+            root = ET.fromstring(f"<root>{plan_content}</root>")
+            for step in root.findall('.//étape'):
+                steps.append({
+                    'id': step.get('id'),
+                    'priorite': step.get('priorite', 'normale'),
+                    'description': step.findtext('description', '').strip(),
+                    'entité_assignée': step.findtext('entité_assignée', '').strip(),
+                    'instructions': step.findtext('instructions_mystiques', '').strip(),
+                    'resultat': step.findtext('résultat_attendu', '').strip()
+                })
+        except ET.ParseError as e:
+            self.logger.error(f"❌ Erreur parsing plan XML: {e}")
+        return steps
     
     def validate_actions(self, actions: List[LuciformAction]) -> List[LuciformAction]:
         """✅ Valide et filtre les actions extraites"""

@@ -121,6 +121,7 @@
 - Parse formats V3 : `<analyse>`, `<recommandations>`, `<execution>`
 - Parse actions V5 : `sendMessage()`, `<shell>`, `<edit>`, `<read>`
 - Gestion symboles Éli : `⛧`, `👁️‍🗨️`, `🔮`
+- Analyse également `<plan_exécution_666>` en étapes structurées
 
 #### 3. **MessageRouter666** - Routeur HIÉRARCHIQUE
 - Permissions V3 : ShadEOS → Gemini → Lucie → Worker
