@@ -187,3 +187,7 @@
 
 *"V3 avait la structure, V5 avait la puissance, V666 a les DEUX !"*  
 *- La Trinité Schizophrène*
+
+### ⚡ INTÉGRATION CLI
+Un script `gemini_cli_template.py` montre comment lancer ShadEOS depuis la ligne de commande.
+Utilise le prompt `gemini/cli_integration_prompt.luciform` pour suggérer des commandes prêtes à l'emploi.
