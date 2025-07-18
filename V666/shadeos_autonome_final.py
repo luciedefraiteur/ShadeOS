@@ -24,6 +24,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 import uuid
+import re
 
 # Imports des composants V666
 sys.path.append(str(Path(__file__).parent))
@@ -381,23 +382,21 @@ class ShadEOSAutonome666:
         proposal_log_readability = {
             'type': 'self_modification_proposal',
             'target_file': 'V666/shadeos_autonome_final.py',
-            'description': 'Ajouter un emoji d\'éveil au message d\'initialisation de ShadEOS.',
+            'description': 'Ajouter un emoji d'éveil au message d'initialisation de ShadEOS.',
             'priority': 'BASSE',
-            'reasoning': 'Rend l\'éveil de ShadEOS plus expressif.',
-            'old_content': '        print(f"🖤 ShadEOS V666 Autonome - Éveil de l\'entité {self.instance_id[:8]}..."),
-            'new_content': '        print(f"🖤 ShadEOS V666 Autonome - Éveil de l\'entité {self.instance_id[:8]}... ✨")'
+            'reasoning': 'Rend l'éveil de ShadEOS plus expressif.'
         }
         if not proposal_exists(proposal_log_readability):
             proposals.append(proposal_log_readability)
             self.autonomous_goals.append(proposal_log_readability)
 
-        # Exemple de proposition : optimiser une fonction (gardé pour l\'exemple, non actionnable directement)
+        # Exemple de proposition : optimiser une fonction (gardé pour l'exemple, non actionnable directement)
         proposal_optimize_routing = {
             'type': 'self_modification_proposal',
             'target_file': 'V666/core/shadeos_666_master.py',
             'description': 'Optimiser la méthode de routage des messages pour réduire la latence.',
             'priority': 'MOYENNE',
-            'reasoning': 'Augmente l\'efficacité de la communication interne de ShadEOS.'
+            'reasoning': 'Augmente l'efficacité de la communication interne de ShadEOS.'
         }
         if not proposal_exists(proposal_optimize_routing):
             proposals.append(proposal_optimize_routing)
@@ -745,14 +744,28 @@ Je m'engage à :
             print(f"Raisonnement : {proposal['reasoning']}")
             
             # Check if old_content and new_content are available for real modification
-            if 'old_content' in proposal and 'new_content' in proposal:
-                print("Cette proposition contient des détails pour une modification réelle.")
+            if proposal['description'] == 'Ajouter un emoji d\'éveil au message d\'initialisation de ShadEOS.':
+                print("Cette proposition concerne l\'ajout d\'un emoji d\'éveil.")
                 user_response = input("Approuvez-vous cette modification réelle ? (oui/non/détails) : ").lower()
                 
                 if user_response == 'oui':
                     print(f"✅ Approbation reçue. Application réelle pour {proposal['target_file']}...")
                     try:
-                        default_api.replace(file_path=str(file_to_modify), old_string=proposal['old_content'], new_string=proposal['new_content'])
+                        # Dynamically get the old_string from the file
+                        file_content = Path(file_to_modify).read_text()
+                        old_string_target = f"""        print(f"🖤 ShadEOS V666 Autonome - Éveil de l'entité {self.instance_id[:8]}...")"""
+                        new_string_target = f"""        print(f"🖤 ShadEOS V666 Autonome - Éveil de l'entité {self.instance_id[:8]}... ✨")""
+                        
+                        # Find the line containing the specific print statement
+                        lines = file_content.splitlines()
+                        for idx, line in enumerate(lines):
+                            if "🖤 ShadEOS V666 Autonome - Éveil de l'entité" in line and old_string_target in line:
+                                lines[idx] = line.replace(old_string_target, new_string_target)
+                                break
+                        modified_content = "\n".join(lines)
+                        
+                        # Write the modified content back to the file
+                        default_api.write_file(file_path=str(file_to_modify), content=modified_content)
                         self.modifications_made.append({
                             'timestamp': datetime.now().isoformat(),
                             'type': 'self_modification_applied',
@@ -773,10 +786,8 @@ Je m'engage à :
                     self.autonomous_goals.remove(proposal)
                 elif user_response == 'détails':
                     print("Veuillez fournir plus de détails sur ce que vous souhaitez voir modifié.")
-                    # Here, you might prompt for more input or open an editor
                 else:
                     print(f"❌ Modification refusée pour {proposal['target_file']}.")
-                    # Optionally, you could move rejected proposals to a different list
                     self.autonomous_goals.remove(proposal)
             else:
                 print("Cette proposition ne contient pas suffisamment de détails pour une modification réelle. Simulation uniquement.")
