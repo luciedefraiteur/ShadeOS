@@ -336,6 +336,23 @@ class LuciformParser:
             return match.group(1).strip()
         return ""
 
+    def parse_proposals(self, xml_content: str) -> List[Dict[str, Any]]:
+        """Parses XML content to extract self-modification proposals."""
+        proposals = []
+        try:
+            root = ET.fromstring(xml_content)
+            for proposal_elem in root.findall('.//proposal'):
+                proposal = {
+                    'type': proposal_elem.findtext('type', '').strip(),
+                    'target_file': proposal_elem.findtext('target_file', '').strip(),
+                    'description': proposal_elem.findtext('description', '').strip(),
+                    'priority': proposal_elem.findtext('priority', '').strip(),
+                    'reasoning': proposal_elem.findtext('reasoning', '').strip()
+                }
+                proposals.append(proposal)
+        except ET.ParseError as e:
+            self.logger.error(f"❌ Erreur parsing proposals XML: {e}")
+        return proposals
 
 def test_parser():
     """🧪 Test du LuciformParser"""

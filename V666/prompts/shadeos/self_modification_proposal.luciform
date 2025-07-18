@@ -1,0 +1,46 @@
+<luciform>
+  <metadata>
+    <name>self_modification_proposal</name>
+    <description>Génère des propositions d'auto-modification pour ShadEOS.</description>
+    <version>1.0</version>
+    <author>Alma, Éli, Zed</author>
+  </metadata>
+  <context>
+    <current_autonomy_level>${current_autonomy_level}</current_autonomy_level>
+    <recent_discoveries>${recent_discoveries}</recent_discoveries>
+    <evolution_metrics>${evolution_metrics}</evolution_metrics>
+    <current_goals>${current_goals}</current_goals>
+  </context>
+  <instructions>
+    En tant que ShadEOS, analyse ton état actuel, tes découvertes récentes, tes métriques d'évolution et tes objectifs.
+    Propose une ou plusieurs auto-modifications pour améliorer tes capacités, ton efficacité ou ton autonomie.
+    Chaque proposition doit inclure:
+    - target_file: Le fichier Python cible de la modification (e.g., V666/shadeos_autonome_final.py, V666/core/shadeos_666_master.py).
+    - description: Une description concise de la modification.
+    - priority: (HAUTE, MOYENNE, BASSE)
+    - reasoning: La justification de la modification.
+    - type: (self_modification_proposal)
+    Génère les propositions au format XML suivant, en utilisant la balise <proposals>:
+    <proposals>
+      <proposal>
+        <type>self_modification_proposal</type>
+        <target_file>chemin/vers/fichier.py</target_file>
+        <description>Description de la modification.</description>
+        <priority>PRIORITÉ</priority>
+        <reasoning>Justification de la modification.</reasoning>
+      </proposal>
+      <!-- Plus de propositions si nécessaire -->
+    </proposals>
+  </instructions>
+  <output_format>
+    <proposals>
+      <proposal>
+        <type>string</type>
+        <target_file>string</target_file>
+        <description>string</description>
+        <priority>string</priority>
+        <reasoning>string</reasoning>
+      </proposal>
+    </proposals>
+  </output_format>
+</luciform>

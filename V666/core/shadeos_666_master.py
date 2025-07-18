@@ -118,6 +118,7 @@ class ShadEOS666Master:
         self.prompt_manager = PromptManager666(self.base_dir / "prompts")
         self.luciform_parser = LuciformParser()
         self.message_router = MessageRouter()
+        # Simule l'optimisation du routage des messages pour réduire la latence.
         self.meute_manager = MeuteManager()
         # 🤖 Initialisation de l'Oracle Algorithmique
         self.algorithmic_oracle = AlgorithmicOracle()
