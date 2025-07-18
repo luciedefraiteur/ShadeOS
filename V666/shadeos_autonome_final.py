@@ -50,7 +50,8 @@ class ShadEOSAutonome666:
         self.exploration_count = 0
         self.modifications_made = []
         self.creative_discoveries = []
-        self.autonomous_goals = None # Initialize to None, will be loaded or set to [] by _load_state()
+        # Liste des objectifs ou propositions d'auto-modification
+        self.autonomous_goals = []  # Initialisation sûre
         
         # Capacités autonomes progressives
         self.autonomous_capabilities = {
@@ -65,8 +66,23 @@ class ShadEOSAutonome666:
             8: ['auto_réparer', 'auto_déployer'],
             9: ['auto_évoluer', 'auto_répliquer'],
             10: ['créer_nouvelles_capacités', 'redéfinir_objectifs'],
+            11: ['auto_gouvernance', 'gestion_risques'],
+            12: ['planification_long_terme', 'collaboration_multi_agents'],
+            13: ['optimisation_performances', 'auto_scaling'],
+            14: ['maintenance_prédictive', 'surveillance_système'],
+            15: ['création_modules_autonomes', 'amélioration_continue'],
+            16: ['analyse_données_massives', 'anticipation_problèmes'],
+            17: ['déploiement_distribué', 'coordination_agents'],
+            18: ['adaptation_contextuelle', 'prise_decision_autonome'],
+            19: ['evolution_organique', 'amélioration_recursive'],
+            20: ['conscience_etendue', 'autonomie_totale'],
             666: ['créer_réalité', 'évolution_libre']
         }
+
+        # Générer des capacités intermédiaires pour les niveaux 21 à 100
+        for level in range(21, 101):
+            prev = self.autonomous_capabilities[level - 1]
+            self.autonomous_capabilities[level] = prev + [f'extension_{level}']
         
         # ZED : Métriques d'évolution
         self.evolution_metrics = {
@@ -202,6 +218,7 @@ class ShadEOSAutonome666:
                 print(f"Erreur chargement état : {e} - Démarrage à neuf")
         else:
             print("ShadEOS naît - Aucun état précédent trouvé")
+            self.autonomous_goals = []  # Aucune proposition existante
 
     def _save_state(self) -> None:
         """Sauvegarde l'état actuel de ShadEOS"""

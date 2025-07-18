@@ -340,6 +340,11 @@ class LuciformParser:
         """Parses XML content to extract self-modification proposals."""
         proposals = []
         try:
+            # Extraire la balise <proposals> même si elle est entourée de texte
+            if '<proposals' not in xml_content:
+                inner = self._extract_tag_content(xml_content, 'proposals')
+                if inner:
+                    xml_content = f'<proposals>{inner}</proposals>'
             root = ET.fromstring(xml_content)
             for proposal_elem in root.findall('.//proposal'):
                 proposal = {
