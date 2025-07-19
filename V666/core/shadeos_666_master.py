@@ -59,30 +59,35 @@ class PromptManager666:
     def load_prompt(self, entity: str, prompt_name: str, variables: Dict[str, Any] = None) -> str:
         """📜 Charge un prompt V3 et l'AMPLIFIE démoniaqueement"""
         try:
-            prompt_path = self.prompts_dir / entity / f"{prompt_name}.prompt"
-            
-            if not prompt_path.exists():
-                raise FileNotFoundError(f"Prompt non trouvé: {prompt_path}")
-            
+            # Chercher d'abord .luciform, puis .prompt
+            prompt_path_luciform = self.prompts_dir / entity / f"{prompt_name}.luciform"
+            prompt_path_prompt = self.prompts_dir / entity / f"{prompt_name}.prompt"
+            if prompt_path_luciform.exists():
+                prompt_path = prompt_path_luciform
+            elif prompt_path_prompt.exists():
+                prompt_path = prompt_path_prompt
+            else:
+                raise FileNotFoundError(f"Prompt non trouvé: {prompt_path_luciform} ni {prompt_path_prompt}")
+
             # Cache check
             cache_key = f"{entity}_{prompt_name}"
             if cache_key not in self.prompts_cache:
                 with open(prompt_path, 'r', encoding='utf-8') as f:
                     self.prompts_cache[cache_key] = f.read()
-            
+
             prompt_content = self.prompts_cache[cache_key]
-            
+
             # 👁️‍🗨️ ÉLI : AMPLIFICATION démoniaque !
             prompt_content = self._amplify_with_eli(prompt_content)
-            
+
             # Variables substitution
             if variables:
                 for var, value in variables.items():
                     prompt_content = prompt_content.replace(f"${var}", str(value))
-            
+
             self.logger.debug(f"📜 Prompt chargé et AMPLIFIÉ: {entity}/{prompt_name}")
             return prompt_content
-            
+
         except Exception as e:
             self.logger.error(f"❌ Erreur chargement prompt: {e}")
             return f"<luciform><erreur>Prompt {entity}/{prompt_name} non disponible</erreur></luciform>"

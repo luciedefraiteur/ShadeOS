@@ -337,26 +337,33 @@ class LuciformParser:
         return ""
 
     def parse_proposals(self, xml_content: str) -> List[Dict[str, Any]]:
-        """Parses XML content to extract self-modification proposals."""
+        """Parse manuellement les propositions d'auto-modification, supporte les balises rituelles <luciform ⛧> et XML non strict."""
         proposals = []
-        try:
-            # Extraire la balise <proposals> même si elle est entourée de texte
-            if '<proposals' not in xml_content:
-                inner = self._extract_tag_content(xml_content, 'proposals')
-                if inner:
-                    xml_content = f'<proposals>{inner}</proposals>'
-            root = ET.fromstring(xml_content)
-            for proposal_elem in root.findall('.//proposal'):
-                proposal = {
-                    'type': proposal_elem.findtext('type', '').strip(),
-                    'target_file': proposal_elem.findtext('target_file', '').strip(),
-                    'description': proposal_elem.findtext('description', '').strip(),
-                    'priority': proposal_elem.findtext('priority', '').strip(),
-                    'reasoning': proposal_elem.findtext('reasoning', '').strip()
-                }
-                proposals.append(proposal)
-        except ET.ParseError as e:
-            self.logger.error(f"❌ Erreur parsing proposals XML: {e}")
+        import re
+        # 1. Normaliser la balise racine rituelle <luciform ...> en <luciform>
+        xml_content = re.sub(r'<luciform[^>]*>', '<luciform>', xml_content)
+        xml_content = re.sub(r'</luciform[^>]*>', '</luciform>', xml_content)
+        # 2. Extraire le bloc <proposals>...</proposals>
+        proposals_block = re.search(r'<proposals>(.*?)</proposals>', xml_content, re.DOTALL | re.IGNORECASE)
+        if not proposals_block:
+            self.logger.error("❌ Aucun bloc <proposals> trouvé dans la réponse luciform.")
+            return []
+        proposals_text = proposals_block.group(1)
+        # 3. Extraire chaque <proposal>...</proposal>
+        proposal_matches = re.findall(r'<proposal>(.*?)</proposal>', proposals_text, re.DOTALL | re.IGNORECASE)
+        for proposal_text in proposal_matches:
+            # 4. Extraire chaque champ à la main
+            def extract_field(field):
+                match = re.search(rf'<{field}>(.*?)</{field}>', proposal_text, re.DOTALL | re.IGNORECASE)
+                return match.group(1).strip() if match else ''
+            proposal = {
+                'type': extract_field('type'),
+                'target_file': extract_field('target_file'),
+                'description': extract_field('description'),
+                'priority': extract_field('priority'),
+                'reasoning': extract_field('reasoning')
+            }
+            proposals.append(proposal)
         return proposals
 
 def test_parser():

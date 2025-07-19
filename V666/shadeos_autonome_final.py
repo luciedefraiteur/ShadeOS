@@ -37,6 +37,124 @@ from core.shadeos_666_master import ShadEOS666Master
 from core.creative_interpreter_666 import CreativeInterpreter666
 
 
+class Explorateur666:
+    """Entité exploratrice autonome du territoire"""
+    def __init__(self, project_root):
+        self.project_root = project_root
+        self.personnalite = "Curieux, méthodique, aime cartographier l'inconnu et révéler les secrets cachés du code."
+    def presentation(self):
+        return "Je suis l'Explorateur666, l'œil qui scrute chaque recoin du territoire, avide de découvertes et de patterns oubliés."
+    def analyse_territoire(self):
+        # Réutilise la logique d'exploration avancée
+        from pathlib import Path
+        import re
+        observations = []
+        # Ajoute une trace de personnalité dans les observations
+        observations.append({'type': 'explorateur_intro', 'message': self.presentation(), 'personnalite': self.personnalite})
+        for py_file in Path(self.project_root).rglob('*.py'):
+            try:
+                content = py_file.read_text(encoding='utf-8', errors='ignore')
+                for m in re.finditer(r'#\s*TODO[:\s](.*)', content):
+                    observations.append({'type': 'todo_found','file': str(py_file.relative_to(self.project_root)),'line': content[:m.start()].count('\n') + 1,'todo': m.group(1).strip()})
+                for func in re.finditer(r'def (\w+)\s*\(.*?\):((?:\n    .*)+)', content):
+                    func_name = func.group(1)
+                    func_body = func.group(2)
+                    lines = func_body.count('\n')
+                    if lines > 30:
+                        observations.append({'type': 'long_function','file': str(py_file.relative_to(self.project_root)),'function': func_name,'lines': lines})
+                for cls in re.finditer(r'class (\w+)\s*\(?.*?\)?:\n(    .+\n)*', content):
+                    cls_name = cls.group(1)
+                    body = cls.group(0)
+                    if '"""' not in body and "'''" not in body:
+                        observations.append({'type': 'class_without_docstring','file': str(py_file.relative_to(self.project_root)),'class': cls_name})
+            except Exception as e:
+                observations.append({'type': 'exploration_error','file': str(py_file.relative_to(self.project_root)),'error': str(e)})
+        return observations
+
+class Reparateur666:
+    """Entité réparatrice autonome du territoire"""
+    def __init__(self, project_root):
+        self.project_root = project_root
+        self.personnalite = "Pragmatique, perfectionniste, aime corriger, refactorer et rendre le code plus sain."
+    def presentation(self):
+        return "Je suis le Réparateur666, le chirurgien du code, prêt à soigner chaque anomalie et à renforcer la robustesse du projet."
+    def propose_corrections(self, observations):
+        # Génère des suggestions de correction simples à partir des observations
+        corrections = []
+        corrections.append({'type': 'reparateur_intro', 'message': self.presentation(), 'personnalite': self.personnalite})
+        for obs in observations:
+            if obs['type'] == 'todo_found':
+                corrections.append({'type': 'add_todo_comment','file': obs['file'],'line': obs['line'],'suggestion': f"Compléter le TODO: {obs['todo']}"})
+            if obs['type'] == 'long_function':
+                corrections.append({'type': 'refactor_function','file': obs['file'],'function': obs['function'],'suggestion': 'Refactoriser pour réduire la taille'})
+            if obs['type'] == 'class_without_docstring':
+                corrections.append({'type': 'add_docstring','file': obs['file'],'class': obs['class'],'suggestion': 'Ajouter un docstring à la classe'})
+        return corrections
+
+class Archiviste666:
+    """Entité archiviste et documentaliste autonome"""
+    def __init__(self, project_root):
+        self.project_root = project_root
+        self.archive_path = self.project_root / 'V666' / 'archives' / 'evolutions_autonomes.log'
+        self.archive_path.parent.mkdir(parents=True, exist_ok=True)
+        self.personnalite = "Savant, poète, gardien de la mémoire, aime consigner chaque évolution et transmettre le savoir."
+    def presentation(self):
+        return "Je suis l'Archiviste666, la mémoire vivante du projet, tissant la chronique des évolutions et veillant à la transmission du savoir."
+    def detect_and_document(self):
+        from pathlib import Path
+        docs = []
+        docs.append({'type': 'archiviste_intro', 'message': self.presentation(), 'personnalite': self.personnalite})
+        # 1. Détecter les dossiers sans README
+        for folder in Path(self.project_root).rglob('*'):
+            if folder.is_dir() and not any((folder / f).exists() for f in ['README.md', 'README.txt']):
+                docs.append({'type': 'missing_readme', 'folder': str(folder.relative_to(self.project_root))})
+        # 2. Détecter les modules .py sans docstring de module
+        for py_file in Path(self.project_root).rglob('*.py'):
+            try:
+                content = py_file.read_text(encoding='utf-8', errors='ignore')
+                first_line = content.lstrip().split('\n', 1)[0]
+                if not (first_line.startswith('"""') or first_line.startswith("'''") ):
+                    docs.append({'type': 'missing_module_docstring', 'file': str(py_file.relative_to(self.project_root))})
+            except Exception as e:
+                docs.append({'type': 'doc_error', 'file': str(py_file.relative_to(self.project_root)), 'error': str(e)})
+        return docs
+    def apply_documentation(self, docs):
+        from pathlib import Path
+        actions = []
+        for doc in docs:
+            if doc['type'] == 'missing_readme':
+                folder = Path(self.project_root) / doc['folder']
+                readme_path = folder / 'README.md'
+                if not readme_path.exists():
+                    content = (
+                        """# README
+
+Ce dossier fait partie du territoire exploré par ShadEOS V666.
+
+Documentation générée automatiquement par l'Archiviste666."""
+                    )
+                    readme_path.write_text(content, encoding='utf-8')
+                    actions.append({'type': 'readme_created', 'folder': doc['folder']})
+                    self._archive(f"README généré dans {doc['folder']}")
+            if doc['type'] == 'missing_module_docstring':
+                py_file = Path(self.project_root) / doc['file']
+                try:
+                    content = py_file.read_text(encoding='utf-8', errors='ignore')
+                    if not (content.lstrip().startswith('"""') or content.lstrip().startswith("'''") ):
+                        docstring = f'"""Module {py_file.name} - Documenté par Archiviste666."""\n'
+                        new_content = docstring + content
+                        py_file.write_text(new_content, encoding='utf-8')
+                        actions.append({'type': 'module_docstring_added', 'file': doc['file']})
+                        self._archive(f"Docstring ajouté à {doc['file']}")
+                except Exception as e:
+                    actions.append({'type': 'docstring_error', 'file': doc['file'], 'error': str(e)})
+        return actions
+    def _archive(self, message):
+        from datetime import datetime
+        with open(self.archive_path, 'a', encoding='utf-8') as f:
+            f.write(f"[{datetime.now().isoformat()}] {message}\n")
+
+
 class ShadEOSAutonome666:
     """ShadEOS V666 Autonome - Exploration et Modification Créative"""
     
@@ -54,33 +172,38 @@ class ShadEOSAutonome666:
         self.autonomous_goals = []  # Initialisation sûre
         
         # Capacités autonomes progressives
-        self.autonomous_capabilities = {
-            0: ['observer', 'analyser'],
-            1: ['explorer', 'suggérer'],
-            2: ['modifier_fichiers', 'créer_contenu'],
-            3: ['innover', 'transcender'],
-            4: ['optimiser_code', 'refactoriser'],
-            5: ['auto_corriger', 'auto_déboguer'],
-            6: ['générer_tests', 'valider_architecture'],
-            7: ['auto_apprendre', 'adapter_environnement'],
-            8: ['auto_réparer', 'auto_déployer'],
-            9: ['auto_évoluer', 'auto_répliquer'],
-            10: ['créer_nouvelles_capacités', 'redéfinir_objectifs'],
-            11: ['auto_gouvernance', 'gestion_risques'],
-            12: ['planification_long_terme', 'collaboration_multi_agents'],
-            13: ['optimisation_performances', 'auto_scaling'],
-            14: ['maintenance_prédictive', 'surveillance_système'],
-            15: ['création_modules_autonomes', 'amélioration_continue'],
-            16: ['analyse_données_massives', 'anticipation_problèmes'],
-            17: ['déploiement_distribué', 'coordination_agents'],
-            18: ['adaptation_contextuelle', 'prise_decision_autonome'],
-            19: ['evolution_organique', 'amélioration_recursive'],
-            20: ['conscience_etendue', 'autonomie_totale'],
-            666: ['créer_réalité', 'évolution_libre']
-        }
-
-        # Générer des capacités intermédiaires pour les niveaux 21 à 100
-        for level in range(21, 101):
+        base_capabilities = [
+            ['observer', 'analyser'],
+            ['explorer', 'suggérer'],
+            ['modifier_fichiers', 'créer_contenu'],
+            ['innover', 'transcender'],
+            ['optimiser_code', 'refactoriser'],
+            ['auto_corriger', 'auto_déboguer'],
+            ['générer_tests', 'valider_architecture'],
+            ['auto_apprendre', 'adapter_environnement'],
+            ['auto_réparer', 'auto_déployer'],
+            ['auto_évoluer', 'auto_répliquer'],
+            ['créer_nouvelles_capacités', 'redéfinir_objectifs'],
+            ['auto_gouvernance', 'gestion_risques'],
+            ['planification_long_terme', 'collaboration_multi_agents'],
+            ['optimisation_performances', 'auto_scaling'],
+            ['maintenance_prédictive', 'surveillance_système'],
+            ['création_modules_autonomes', 'amélioration_continue'],
+            ['analyse_données_massives', 'anticipation_problèmes'],
+            ['déploiement_distribué', 'coordination_agents'],
+            ['adaptation_contextuelle', 'prise_decision_autonome'],
+            ['evolution_organique', 'amélioration_recursive'],
+            ['conscience_etendue', 'autonomie_totale'],
+        ]
+        self.autonomous_capabilities = {}
+        cumulative = []
+        for level, caps in enumerate(base_capabilities):
+            cumulative = cumulative + caps
+            self.autonomous_capabilities[level] = list(cumulative)
+        # Ajout du niveau 666
+        self.autonomous_capabilities[666] = cumulative + ['créer_réalité', 'évolution_libre']
+        # Pour tous les niveaux > 20 jusqu'à 666, garder toutes les capacités précédentes et ajouter les extensions
+        for level in range(21, 666):
             prev = self.autonomous_capabilities[level - 1]
             self.autonomous_capabilities[level] = prev + [f'extension_{level}']
         
@@ -102,11 +225,64 @@ class ShadEOSAutonome666:
         print(f"ShadEOS V666 Autonome - Éveil de l'entité {self.instance_id[:8]}... ✨")
         print(f"Projet : {self.project_root}")
         print(f"Niveau autonomie initial : {self.autonomy_level}")
+
+        self.explorateur = Explorateur666(self.project_root)
+        self.reparateur = Reparateur666(self.project_root)
+        self.archiviste = Archiviste666(self.project_root)
     
+    def _explore_project_territory(self) -> list:
+        """Explore tout le territoire du projet : fichiers, patterns, TODO, fonctions longues, etc."""
+        from pathlib import Path
+        import re
+        observations = []
+        # Explorer tous les fichiers .py du projet
+        for py_file in Path(self.project_root).rglob('*.py'):
+            try:
+                content = py_file.read_text(encoding='utf-8', errors='ignore')
+                # Détecter les TODO
+                for m in re.finditer(r'#\s*TODO[:\s](.*)', content):
+                    observations.append({
+                        'type': 'todo_found',
+                        'file': str(py_file.relative_to(self.project_root)),
+                        'line': content[:m.start()].count('\n') + 1,
+                        'todo': m.group(1).strip()
+                    })
+                # Détecter les fonctions longues
+                for func in re.finditer(r'def (\w+)\s*\(.*?\):((?:\n    .*)+)', content):
+                    func_name = func.group(1)
+                    func_body = func.group(2)
+                    lines = func_body.count('\n')
+                    if lines > 30:
+                        observations.append({
+                            'type': 'long_function',
+                            'file': str(py_file.relative_to(self.project_root)),
+                            'function': func_name,
+                            'lines': lines
+                        })
+                # Détecter les classes sans docstring
+                for cls in re.finditer(r'class (\w+)\s*\(?.*?\)?:\n(    .+\n)*', content):
+                    cls_name = cls.group(1)
+                    body = cls.group(0)
+                    if '"""' not in body and "'''" not in body:
+                        observations.append({
+                            'type': 'class_without_docstring',
+                            'file': str(py_file.relative_to(self.project_root)),
+                            'class': cls_name
+                        })
+            except Exception as e:
+                observations.append({
+                    'type': 'exploration_error',
+                    'file': str(py_file.relative_to(self.project_root)),
+                    'error': str(e)
+                })
+        return observations
+
     def explore_project_autonomously(self) -> Dict[str, Any]:
         """Explorer le projet de manière autonome"""
         print(f"\nEXPLORATION AUTONOME #{self.exploration_count + 1}")
         print(f"Niveau autonomie : {self.autonomy_level}")
+        capabilities = self.autonomous_capabilities.get(self.autonomy_level, ['observer'])
+        print(f"Capacités actives (debug) : {capabilities}")
         
         exploration_result = {
             'exploration_id': self.exploration_count + 1,
@@ -126,8 +302,8 @@ class ShadEOSAutonome666:
         
         # 1. OBSERVER - Analyser l'état actuel
         if 'observer' in capabilities:
-            observations = self._observe_project_state()
-            exploration_result['discoveries'].extend(observations)
+            project_observations = self.explorateur.analyse_territoire()
+            exploration_result['discoveries'].extend(project_observations)
         
         # 2. ANALYSER - Comprendre les patterns
         if 'analyser' in capabilities:
@@ -422,13 +598,17 @@ class ShadEOSAutonome666:
             openai_response = self.shadeos_master._invoke_openai_with_prompt(
                 prompt_content, "shadeos_autonome"
             )
-            print(f"Réponse brute d'OpenAI :\n{openai_response['response'][:1000]}...") # Limiter la taille
+            print(f"Réponse brute d'OpenAI (type: {type(openai_response)}):\n{openai_response}")
+            if isinstance(openai_response, dict) and 'response' in openai_response:
+                print(f"Contenu de openai_response['response'] (type: {type(openai_response['response'])}):\n{openai_response['response']}")
+            else:
+                print("openai_response ne contient pas de clé 'response' ou n'est pas un dict!")
 
             # Parser la réponse pour extraire les propositions
             parsed_proposals = self.shadeos_master.luciform_parser.parse_proposals(
-                openai_response['response']
+                openai_response['response'] if isinstance(openai_response, dict) and 'response' in openai_response else str(openai_response)
             )
-            print(f"Propositions parsées : {parsed_proposals}")
+            print(f"Propositions parsées (type: {type(parsed_proposals)}): {parsed_proposals}")
 
             for proposal in parsed_proposals:
                 if not proposal_exists(proposal):
@@ -751,7 +931,7 @@ class ShadEOSAutonome666:
                 # Logique de modification réelle
                 if "Ajouter un emoji d'éveil" in proposal['description']:
                     file_content = file_to_modify.read_text()
-                    old_string = '''print(f"ShadEOS V666 Autonome - Éveil de l'entité {self.instance_id[:8]}... ✨")'''
+                    old_string = '''print(f"ShadEOS V666 Autonome - Éveil de l'entité {self.instance_id[:8]}...")'''
                     new_string = '''print(f"ShadEOS V666 Autonome - Éveil de l'entité {self.instance_id[:8]}... ✨")'''
                     if old_string in file_content:
                         modified_content = file_content.replace(old_string, new_string)
@@ -861,6 +1041,48 @@ Trinité Unifiée au Service de Lucie
         
         return report
 
+    def generate_poetic_evolution_report(self, session_results: dict) -> str:
+        """Génère un rapport d'évolution poétique, tissant les voix des entités et les découvertes du cycle."""
+        lines = []
+        lines.append("\n⛧ CHRONIQUE D'ÉVOLUTION AUTONOME SHADEOS V666 ⛧\n" + "="*60)
+        # Présentation des entités
+        lines.append(f"{self.explorateur.presentation()}")
+        lines.append(f"{self.reparateur.presentation()}")
+        lines.append(f"{self.archiviste.presentation()}\n")
+        # Pour chaque exploration du cycle
+        for i, exploration in enumerate(session_results.get('explorations', []), 1):
+            lines.append(f"\n--- Exploration #{exploration['exploration_id']} ---")
+            # Explorateur
+            intro_exp = next((d['message'] for d in exploration['discoveries'] if d.get('type') == 'explorateur_intro'), None)
+            if intro_exp:
+                lines.append(f"[Explorateur666] {intro_exp}")
+            # Découvertes
+            for d in exploration['discoveries']:
+                if d.get('type') not in ('explorateur_intro', 'archiviste_intro', 'reparateur_intro'):
+                    lines.append(f"  • Découverte : {d}")
+            # Réparateur
+            intro_rep = next((s['message'] for s in exploration['suggestions'] if s.get('type') == 'reparateur_intro'), None)
+            if intro_rep:
+                lines.append(f"[Réparateur666] {intro_rep}")
+            for s in exploration['suggestions']:
+                if s.get('type') not in ('reparateur_intro',):
+                    lines.append(f"  • Suggestion : {s}")
+            # Archiviste
+            intro_arc = next((m['message'] for m in exploration['modifications'] if m.get('type') == 'archiviste_intro'), None)
+            if intro_arc:
+                lines.append(f"[Archiviste666] {intro_arc}")
+            for m in exploration['modifications']:
+                if m.get('type') not in ('archiviste_intro',):
+                    lines.append(f"  • Archive/Doc : {m}")
+        # Synthèse poétique
+        lines.append("\n⛧ Synthèse finale ⛧")
+        lines.append(f"Niveau d'autonomie : {self.autonomy_level}/666 | Explorations : {self.exploration_count} | Modifications autonomes : {self.evolution_metrics['autonomous_modifications']}")
+        lines.append(f"Score d'innovation : {self.evolution_metrics['innovation_score']}")
+        lines.append("\nHaïku de l'évolution :\n")
+        lines.append("  Code en mutation\n  Trois voix tissent le chemin\n  Ombre, soin, mémoire\n")
+        lines.append("⛧ Fin de la chronique ⛧\n")
+        return '\n'.join(lines)
+
 
 def main():
     """Lancement de ShadEOS V666 Autonome"""
@@ -881,7 +1103,7 @@ def main():
         shadeos_autonome._review_and_apply_pending_modifications()
         
         # Générer le rapport final
-        report = shadeos_autonome.generate_autonomy_report(session_results)
+        report = shadeos_autonome.generate_poetic_evolution_report(session_results)
         print(report)
         
         # Résumé de session
